@@ -53,3 +53,5 @@ Legal pages: `/privacy`, `/terms`, and `/legal`.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE).
+
+The license covers original project code only. Third-party videos, thumbnails, provider names, and marks remain subject to their owners' rights and terms.
