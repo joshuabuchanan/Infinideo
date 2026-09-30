@@ -49,3 +49,7 @@ This is a portfolio project, not a managed production service. Configure product
 Video fixtures, embeds, thumbnails, and provider results may have separate rights and terms. Verify that each item is permitted for your intended use; linking or embedding content does not grant redistribution rights. Playback analytics are opt-in and currently written to server logs rather than stored as app records.
 
 Legal pages: `/privacy`, `/terms`, and `/legal`.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
