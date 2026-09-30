@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { ArrowLeft, Camera, Eye, ExternalLink, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, Camera, Eye, ExternalLink, Heart, Share2, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
 import type { FeedVideo } from "@/lib/feed-videos";
@@ -135,6 +135,7 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
   const [hasError, setHasError] = useState(false);
   const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
+  const [isClipAudioEnabled, setIsClipAudioEnabled] = useState(false);
   const [areClipDetailsVisible, setAreClipDetailsVisible] = useState(true);
   const [isClipCameraOpen, setIsClipCameraOpen] = useState(false);
   const likedClipIdsSnapshot = useSyncExternalStore(
@@ -356,14 +357,14 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
 
           if (isActiveClip && video.embedUrl && video.sourceId === "twitch" && origin) {
             const twitchClipId = video.id.replace(/^twitch:/, "");
-            autoplayEmbedUrl = `https://clips.twitch.tv/embed?clip=${encodeURIComponent(twitchClipId)}&parent=${encodeURIComponent(new URL(origin).hostname)}&autoplay=true&muted=true`;
+            autoplayEmbedUrl = `https://clips.twitch.tv/embed?clip=${encodeURIComponent(twitchClipId)}&parent=${encodeURIComponent(new URL(origin).hostname)}&autoplay=true&muted=${!isClipAudioEnabled}`;
           } else if (isActiveClip && video.sourceId === "youtube") {
             const youtubeVideoId = video.id.replace(/^youtube:/, "");
-            autoplayEmbedUrl = `https://www.youtube.com/embed/${encodeURIComponent(youtubeVideoId)}?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=${encodeURIComponent(youtubeVideoId)}`;
+            autoplayEmbedUrl = `https://www.youtube.com/embed/${encodeURIComponent(youtubeVideoId)}?autoplay=1&mute=${isClipAudioEnabled ? 0 : 1}&controls=1&playsinline=1&loop=1&playlist=${encodeURIComponent(youtubeVideoId)}`;
           } else if (isActiveClip && video.embedUrl && (video.sourceId === "dailymotion" || video.sourceId === "peertube")) {
             const autoplayUrl = new URL(video.embedUrl);
             autoplayUrl.searchParams.set("autoplay", "1");
-            autoplayUrl.searchParams.set(video.sourceId === "dailymotion" ? "mute" : "muted", "1");
+            autoplayUrl.searchParams.set(video.sourceId === "dailymotion" ? "mute" : "muted", isClipAudioEnabled ? "0" : "1");
             autoplayEmbedUrl = autoplayUrl.toString();
           }
 
@@ -379,7 +380,7 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
                   className="feed-clip-player"
                   src={video.videoUrl}
                   autoPlay
-                  muted
+                  muted={!isClipAudioEnabled}
                   loop
                   playsInline
                   preload="auto"
@@ -404,6 +405,15 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
                     </Link>
                   )}
                   <div className="feed-clip-top-actions">
+                    <button
+                      className="feed-clip-top-button"
+                      type="button"
+                      aria-label={isClipAudioEnabled ? "Mute clip audio" : "Enable clip audio"}
+                      aria-pressed={isClipAudioEnabled}
+                      onClick={() => setIsClipAudioEnabled((enabled) => !enabled)}
+                    >
+                      {isClipAudioEnabled ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
+                    </button>
                     {areClipDetailsVisible ? (
                       <>
                         <button
