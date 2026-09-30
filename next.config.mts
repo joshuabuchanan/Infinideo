@@ -1,10 +1,14 @@
-import type { NextConfig } from "next"; // 👈 Fully supported in .mts format
+import type { NextConfig } from "next";
 import { networkInterfaces } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const localDevOrigins = Object.values(networkInterfaces())
   .flatMap((addresses) => addresses ?? [])
   .filter((address) => address.family === "IPv4" && !address.internal)
   .map((address) => address.address);
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["localhost", "127.0.0.1", ...localDevOrigins],
@@ -17,8 +21,7 @@ const nextConfig: NextConfig = {
     ],
   },
   turbopack: {
-    // 👈 Locks Turbopack to your absolute project folder path context
-    root: "C:\\Users\\jeban\\Infinideo",
+    root: projectRoot,
   },
 };
 
