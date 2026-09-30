@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="45" height="25.98" viewBox="0 0 45 25.98" fill="none">
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="45" y2="25.98" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67e8f9" />
+      <stop offset="1" stop-color="#c084fc" />
+    </linearGradient>
+    <pattern id="hex-grid" width="45" height="25.98" patternUnits="userSpaceOnUse">
+      <path d="m0 0 7.5-12.99h15L30 0l-7.5 12.99h-15z m22.5 12.99L30 0h15l7.5 12.99L45 25.98H30z" stroke="url(#edge)" stroke-width=".8" opacity=".4" />
+    </pattern>
+  </defs>
+  <path fill="url(#hex-grid)" d="M0 0h45v25.98H0z" />
+</svg>

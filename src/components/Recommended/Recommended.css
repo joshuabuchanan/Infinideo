@@ -1,0 +1,40 @@
+.recommended {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.side-video-list {
+  display: flex;
+  gap: 0.75rem;
+  color: inherit;
+}
+
+.side-video-list img {
+  width: 8rem;
+  height: 5rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.vid-info {
+  min-width: 0;
+  font-size: 0.75rem;
+}
+
+.vid-info h2 {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  font-weight: 600;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.vid-info p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
