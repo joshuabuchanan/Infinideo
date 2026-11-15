@@ -182,6 +182,7 @@ export async function GET(request: Request) {
         pageToken,
       });
       const videos = catalog.videos
+        .filter((video) => video.id !== recommendFor)
         .filter((video) => matchesCategory(video, category))
         .filter((video) => !shortForm || (video.duration !== undefined && video.duration > 0 && video.duration <= 60));
       return NextResponse.json({
