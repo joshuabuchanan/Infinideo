@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, ShieldCheck } from "lucide-react";
+import { FileText, Scale, ShieldCheck } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -13,6 +13,7 @@ import {
 const legalItems = [
   { title: "Privacy Policy", label: "Privacy", url: "/privacy", icon: ShieldCheck },
   { title: "Terms of Service", label: "Terms", url: "/terms", icon: FileText },
+  { title: "Legal Notice", label: "Legal", url: "/legal", icon: Scale },
 ];
 
 export const LegalSection = () => (
