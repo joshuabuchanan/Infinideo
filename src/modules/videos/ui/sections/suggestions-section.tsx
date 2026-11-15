@@ -51,7 +51,7 @@ const SuggestionsSectionSuspense = ({
 }: SuggestionsSectionProps) => {
   const [suggestions, query] = trpc.suggestions.getMany.useSuspenseInfiniteQuery({
     videoId,
-    limit: DEFAULT_LIMIT,
+    limit: Math.min(DEFAULT_LIMIT * 2, 100),
   }, {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
@@ -59,7 +59,7 @@ const SuggestionsSectionSuspense = ({
   return (
     <>
       <div className="hidden md:block space-y-3">
-        {suggestions.pages.flatMap((page) => page.items.map((video) => (
+        {suggestions.pages.flatMap((page) => page.items.map((video: { id: string }) => (
           <VideoRowCard
             key={video.id}
             data={video}
@@ -68,7 +68,7 @@ const SuggestionsSectionSuspense = ({
         )))}
       </div>
       <div className="block md:hidden space-y-10">
-        {suggestions.pages.flatMap((page) => page.items.map((video) => (
+        {suggestions.pages.flatMap((page) => page.items.map((video: { id: string }) => (
           <VideoGridCard
             key={video.id}
             data={video}

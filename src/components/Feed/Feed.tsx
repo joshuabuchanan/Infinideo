@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { ArrowLeft, Camera, Eye, ExternalLink, Heart, Share2, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Camera, Eye, ExternalLink, Heart, Pause, Play, Share2, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 
 import type { FeedVideo } from "@/lib/feed-videos";
@@ -135,6 +135,7 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
   const [hasError, setHasError] = useState(false);
   const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
   const [activeClipId, setActiveClipId] = useState<string | null>(null);
+  const [pausedClipId, setPausedClipId] = useState<string | null>(null);
   const [isClipAudioEnabled, setIsClipAudioEnabled] = useState(false);
   const [areClipDetailsVisible, setAreClipDetailsVisible] = useState(true);
   const [isClipCameraOpen, setIsClipCameraOpen] = useState(false);
@@ -191,10 +192,10 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => visibility.set(entry.target, entry.intersectionRatio));
       const mostVisible = [...visibility.entries()]
-        .filter(([, ratio]) => ratio >= 0.5)
+        .filter(([, ratio]) => ratio >= 0.7)
         .sort((first, second) => second[1] - first[1])[0]?.[0];
       setActiveClipId(mostVisible?.getAttribute("data-clip-id") ?? null);
-    }, { root, threshold: [0, 0.5, 0.75, 1] });
+    }, { root, threshold: [0, 0.7, 0.85, 1] });
 
     root.querySelectorAll("[data-clip-card]").forEach((card) => observer.observe(card));
     return () => observer.disconnect();
@@ -353,29 +354,37 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
         {visibleVideos.map((video, index) => {
           const sourceLabel = video.sourceName ?? video.category ?? "Open media";
           const isActiveClip = clips && activeClipId === video.id;
+          const isClipPlaying = isActiveClip && pausedClipId !== video.id;
           let autoplayEmbedUrl: string | null = null;
 
-          if (isActiveClip && video.embedUrl && video.sourceId === "twitch" && origin) {
+          if (isClipPlaying && video.embedUrl && video.sourceId === "twitch" && origin) {
             const twitchClipId = video.id.replace(/^twitch:/, "");
             autoplayEmbedUrl = `https://clips.twitch.tv/embed?clip=${encodeURIComponent(twitchClipId)}&parent=${encodeURIComponent(new URL(origin).hostname)}&autoplay=true&muted=${!isClipAudioEnabled}`;
-          } else if (isActiveClip && video.sourceId === "youtube") {
+          } else if (isClipPlaying && video.sourceId === "youtube") {
             const youtubeVideoId = video.id.replace(/^youtube:/, "");
             autoplayEmbedUrl = `https://www.youtube.com/embed/${encodeURIComponent(youtubeVideoId)}?autoplay=1&mute=${isClipAudioEnabled ? 0 : 1}&controls=1&playsinline=1&loop=1&playlist=${encodeURIComponent(youtubeVideoId)}`;
-          } else if (isActiveClip && video.embedUrl && (video.sourceId === "dailymotion" || video.sourceId === "peertube")) {
+          } else if (isClipPlaying && video.embedUrl && (video.sourceId === "dailymotion" || video.sourceId === "peertube")) {
             const autoplayUrl = new URL(video.embedUrl);
             autoplayUrl.searchParams.set("autoplay", "1");
             autoplayUrl.searchParams.set(video.sourceId === "dailymotion" ? "mute" : "muted", isClipAudioEnabled ? "0" : "1");
             autoplayEmbedUrl = autoplayUrl.toString();
           }
 
+          const previewContent = (
+            <div className="feed-thumbnail-wrap">
+              <img className="feed-thumbnail" src={video.thumbnail} alt={video.title} />
+              <span className="feed-duration">{formatDuration(video.duration)}</span>
+            </div>
+          );
+
           return (
             <article
               key={`${video.id}-${index}`}
-              className={clips ? `feed-card feed-clip-card${isActiveClip ? " is-playing" : ""}${areClipDetailsVisible ? "" : " is-details-hidden"}` : "feed-card"}
+              className={clips ? `feed-card feed-clip-card${isClipPlaying ? " is-playing" : ""}${areClipDetailsVisible ? "" : " is-details-hidden"}` : "feed-card"}
               data-clip-card={clips ? "true" : undefined}
               data-clip-id={clips ? video.id : undefined}
             >
-              {isActiveClip && video.videoUrl ? (
+              {isClipPlaying && video.videoUrl ? (
                 <video
                   className="feed-clip-player"
                   src={video.videoUrl}
@@ -386,7 +395,7 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
                   preload="auto"
                   onPlay={() => recordClipWatch(video)}
                 />
-              ) : isActiveClip && autoplayEmbedUrl ? (
+              ) : isClipPlaying && autoplayEmbedUrl ? (
                 <iframe
                   className="feed-clip-player"
                   src={autoplayEmbedUrl}
@@ -448,32 +457,49 @@ const Feed = ({ search, category, source, channelId, clips = false }: FeedProps)
                   </div>
                 </div>
               )}
-              <Link
-                href={`/feed/${video.id.replace(":", "/")}`}
-                className="feed-card-open"
-                aria-label={`Open video: ${video.title}`}
-              >
-                <div className="feed-thumbnail-wrap">
-                  <img className="feed-thumbnail" src={video.thumbnail} alt={video.title} />
-                  <span className="feed-duration">{formatDuration(video.duration)}</span>
+              {clips ? (
+                <div className="feed-card-open feed-clip-open">
+                  {previewContent}
+                  <button
+                    className="feed-clip-toggle"
+                    type="button"
+                    aria-label={isClipPlaying ? `Pause ${video.title}` : `Play ${video.title}`}
+                    aria-pressed={isClipPlaying}
+                    onClick={() => {
+                      if (!isActiveClip) {
+                        setActiveClipId(video.id);
+                        setPausedClipId(null);
+                      } else {
+                        setPausedClipId((pausedId) => pausedId === video.id ? null : video.id);
+                      }
+                    }}
+                  >
+                    {isClipPlaying ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+                  </button>
                 </div>
-                {!clips && (
+              ) : (
+                <Link
+                  href={`/feed/${video.id.replace(":", "/")}`}
+                  className="feed-card-open"
+                  aria-label={`Open video: ${video.title}`}
+                >
+                  {previewContent}
+                </Link>
+              )}
+              {!clips && (
                   <div className="feed-card-body">
                     <div className="feed-avatar">{video.channelTitle.charAt(0).toUpperCase()}</div>
                     <div className="feed-copy">
                       <h2>{video.title}</h2>
                     </div>
                   </div>
-                )}
-              </Link>
+              )}
 
               {clips && (
                 <div className="feed-card-body">
                   <div className="feed-avatar">{video.channelTitle.charAt(0).toUpperCase()}</div>
                   <div className="feed-copy">
-                    <Link className="feed-clip-title-link" href={`/feed/${video.id.replace(":", "/")}`}>
-                      <h2>{video.title}</h2>
-                    </Link>
+                    <h2>{video.title}</h2>
                     {video.description && <p className="feed-clip-description">{video.description}</p>}
                     <div className="feed-clip-meta">
                       {video.channelId ? (

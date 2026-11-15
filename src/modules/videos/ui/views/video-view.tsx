@@ -22,7 +22,7 @@ export const VideoView = async ({ videoId }: VideoViewProps) => {
           <div className="flex-1 min-w-0">
             <VideoSection videoId={videoId} />
             <div className="xl:hidden block mt-4">
-              <SuggestionsSection videoId={videoId} isManual />
+              <SuggestionsSection videoId={videoId} />
             </div>
             <CommentsSection videoId={videoId} />
           </div>
