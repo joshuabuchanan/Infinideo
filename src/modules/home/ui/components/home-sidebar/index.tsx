@@ -1,12 +1,14 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { MainSection } from "./main-section";
 import PersonalSection from "./personal-section";
 import { TrendingSection } from "./trending-section";
 import { SubscriptionsSection } from "./subscriptions-section";
+import { LegalSection } from "./legal-section";
 
 export const HomeSidebar = () => {
   return (
@@ -23,6 +25,9 @@ export const HomeSidebar = () => {
         <SidebarSeparator className="my-2" />
         <SubscriptionsSection />
       </SidebarContent>
+      <SidebarFooter className="bg-background">
+        <LegalSection />
+      </SidebarFooter>
     </Sidebar>
   );
 };
