@@ -9,6 +9,7 @@ import { InfiniteScroll } from "@/components/infinite-scroll";
 
 import { VideoGridCard, VideoGridCardSkeleton } from "../components/video-grid-card";
 import { VideoRowCard, VideoRowCardSkeleton } from "../components/video-row-card";
+import type { VideoGetManyOutput } from "../../types";
 
 interface SuggestionsSectionProps {
   videoId: string;
@@ -59,7 +60,7 @@ const SuggestionsSectionSuspense = ({
   return (
     <>
       <div className="hidden md:block space-y-3">
-        {suggestions.pages.flatMap((page) => page.items.map((video: { id: string }) => (
+        {suggestions.pages.flatMap((page) => page.items.map((video: VideoGetManyOutput["items"][number]) => (
           <VideoRowCard
             key={video.id}
             data={video}
@@ -68,7 +69,7 @@ const SuggestionsSectionSuspense = ({
         )))}
       </div>
       <div className="block md:hidden space-y-10">
-        {suggestions.pages.flatMap((page) => page.items.map((video: { id: string }) => (
+        {suggestions.pages.flatMap((page) => page.items.map((video: VideoGetManyOutput["items"][number]) => (
           <VideoGridCard
             key={video.id}
             data={video}
