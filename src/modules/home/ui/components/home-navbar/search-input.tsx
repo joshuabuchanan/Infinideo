@@ -15,7 +15,7 @@ export const SearchInput = () => {
   }
 
   return (
-    <form className="mx-auto flex w-full max-w-[600px] items-center justify-center md:justify-start" onSubmit={handleSubmit}>
+    <form className="mx-auto flex w-full max-w-150 items-center justify-center md:justify-start" onSubmit={handleSubmit}>
       <input
         type="text"
         value={query}
